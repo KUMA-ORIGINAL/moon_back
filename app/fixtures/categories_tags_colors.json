@@ -1,0 +1,72 @@
+[
+  {
+    "model": "products.category",
+    "pk": 1,
+    "fields": {"name": "Dinnerware"}
+  },
+  {
+    "model": "products.category",
+    "pk": 2,
+    "fields": {"name": "Ceramic"}
+  },
+  {
+    "model": "products.category",
+    "pk": 3,
+    "fields": {"name": "Furniture"}
+  },
+  {
+    "model": "products.category",
+    "pk": 4,
+    "fields": {"name": "Decor Art"}
+  },
+  {
+    "model": "products.category",
+    "pk": 5,
+    "fields": {"name": "Gifts sets"}
+  },
+  {
+    "model": "products.color",
+    "pk": 1,
+    "fields": {"name": "Beige", "hex_code": "#d6c5b3"}
+  },
+  {
+    "model": "products.color",
+    "pk": 2,
+    "fields": {"name": "Green", "hex_code": "#dbe7d3"}
+  },
+  {
+    "model": "products.color",
+    "pk": 3,
+    "fields": {"name": "Red", "hex_code": "#b37d7d"}
+  },
+  {
+    "model": "products.color",
+    "pk": 4,
+    "fields": {"name": "Violet", "hex_code": "#988b94"}
+  },
+  {
+    "model": "products.tag",
+    "pk": 1,
+    "fields": {"name": "Dinnerware"}
+  },
+  {
+    "model": "products.tag",
+    "pk": 2,
+    "fields": {"name": "Ceramic"}
+  },
+  {
+    "model": "products.tag",
+    "pk": 3,
+    "fields": {"name": "Furniture"}
+  },
+  {
+    "model": "products.tag",
+    "pk": 4,
+    "fields": {"name": "Decor Art"}
+  },
+  {
+    "model": "products.tag",
+    "pk": 5,
+    "fields": {"name": "Gifts sets"}
+  }
+]
