@@ -18,7 +18,7 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Product.objects.filter(is_hidden=False)
     pagination_class = ProductPagination
     filter_backends = (DjangoFilterBackend, OrderingFilter)
-    filterset_fields = ('categories', 'tags', 'color')
+    filterset_fields = ('categories', 'tags',)
     ordering_fields = ('price', 'name')
 
     def get_serializer_class(self):

@@ -16,9 +16,6 @@ class Order(models.Model):
         default=0,
         verbose_name="Общая стоимость"
     )
-    discount = models.DecimalField(max_digits=5, decimal_places=2, default=0.00, verbose_name='Скидка')
-    welcome_discount = models.PositiveSmallIntegerField(default=0, verbose_name="Welcome-скидка")
-    free_case_count = models.PositiveIntegerField(default=0, verbose_name='Количество бесплатных чехлов')
     status = models.CharField(
         max_length=50,
         choices=Status,
@@ -27,16 +24,17 @@ class Order(models.Model):
         blank=True,
         null=True
     )
-    user = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name='orders',
-        verbose_name="Пользователь"
-    )
-
-    city = models.CharField(max_length=100, verbose_name='Город', blank=True, null=True)
-    address = models.CharField(max_length=255, verbose_name='Адрес доставки', blank=True, null=True)
-    phone_number = models.CharField(max_length=20, verbose_name='Номер телефона', blank=True, null=True)
+    first_name = models.CharField("Имя", max_length=64)
+    last_name = models.CharField("Фамилия", max_length=64)
+    company = models.CharField("Компания", max_length=128, blank=True)  # Необязательное поле
+    country = models.CharField("Страна / регион", max_length=64)
+    street_address = models.CharField("Адрес", max_length=255)
+    city = models.CharField("Город", max_length=64)
+    state = models.CharField("Область / район", max_length=64)
+    zip_code = models.CharField("Почтовый индекс", max_length=32, blank=True)  # Необязательное поле
+    phone = models.CharField("Телефон", max_length=32)
+    email = models.EmailField("Email", blank=True)  # Необязательное поле
+    order_notes = models.TextField("Комментарий к заказу", blank=True)  # Необязательное поле
 
     created_at = models.DateTimeField(
         auto_now_add=True,
@@ -48,16 +46,9 @@ class Order(models.Model):
     )
 
     def __str__(self):
-        return f"Заказ {self.id} от {self.user.email}"
+        return f"Заказ №{self.id} от {self.first_name} {self.last_name}"
 
     class Meta:
         ordering = ('-created_at',)
         verbose_name = "Заказ"
         verbose_name_plural = "Заказы"
-
-    def get_case_count(self):
-        """
-        Метод для подсчета количества чехлов в заказе.
-        """
-        case_count = self.order_items.filter(product__is_case=True).aggregate(total=models.Sum('quantity'))['total']
-        return case_count if case_count else 0

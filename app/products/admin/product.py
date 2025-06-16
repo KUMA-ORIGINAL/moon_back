@@ -5,7 +5,7 @@ from django.utils.translation import gettext_lazy as _
 from unfold.admin import ModelAdmin as UnfoldModelAdmin, StackedInline
 from unfold.decorators import display
 
-from ..models import Product, ProductPhoto
+from ..models import Product, ProductPhoto, ProductColorPhoto
 
 
 class ProductPhotoInline(StackedInline):
@@ -16,16 +16,23 @@ class ProductPhotoInline(StackedInline):
     ordering = ('order',)
 
 
+class ProductColorPhotoInline(StackedInline):
+    model = ProductColorPhoto
+    extra = 1
+    fields = ('color', 'photo', 'alt', 'order',)
+    ordering = ('order',)
+
+
 @admin.register(Product)
 class ProductAdmin(UnfoldModelAdmin):
-    list_display = ('id', 'name', 'price', 'display_categories', 'display_tags', 'color', 'is_hidden', 'display_photo')
+    list_display = ('id', 'name', 'price', 'display_categories', 'display_tags', 'is_hidden', 'display_photo')
     list_display_links = ('id', 'name')
     list_editable = ('is_hidden',)
-    list_filter = ('categories', 'tags', 'color')
+    list_filter = ('categories', 'tags')
     search_fields = ('name',)
     autocomplete_fields = ('categories', 'tags')
     readonly_fields = ('created_at', 'updated_at')
-    inlines = [ProductPhotoInline]
+    inlines = [ProductPhotoInline, ProductColorPhotoInline]
     compressed_fields = True
 
     @display(description=_("Категории"))

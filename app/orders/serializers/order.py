@@ -1,70 +1,100 @@
-from decimal import Decimal
-
+import stripe
+from django.conf import settings
 from rest_framework import serializers
 
-from .order_item import OrderItemCreateSerializer, OrderItemListSerializer
+from .order_item import OrderItemCreateSerializer
 from ..models import Order, OrderItem
 
 
 class OrderCreateSerializer(serializers.ModelSerializer):
-    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
-    order_items = OrderItemCreateSerializer(many=True)
+    order_items = OrderItemCreateSerializer(many=True, write_only=True)
+    checkout_url = serializers.CharField(read_only=True)
 
     class Meta:
         model = Order
-        fields = ['id', 'user', 'city', 'address', 'phone_number', 'order_items']
+        fields = [
+            'id',
+            'order_items',
+            'first_name',
+            'last_name',
+            'company',
+            'country',
+            'street_address',
+            'city',
+            'state',
+            'zip_code',
+            'phone',
+            'email',
+            'order_notes',
+            'checkout_url'
+        ]
+        extra_kwargs = {
+            'first_name': {'write_only': True},
+            'last_name': {'write_only': True},
+            'company': {'write_only': True},
+            'country': {'write_only': True},
+            'street_address': {'write_only': True},
+            'city': {'write_only': True},
+            'state': {'write_only': True},
+            'zip_code': {'write_only': True},
+            'phone': {'write_only': True},
+            'email': {'write_only': True},
+            'order_notes': {'write_only': True},
+        }
+
+    def validate_order_items(self, value):
+        if not value:
+            raise serializers.ValidationError("Требуется добавить хотя бы один товар в заказ.")
+        return value
 
     def create(self, validated_data):
         items_data = validated_data.pop('order_items')
         order = Order.objects.create(**validated_data)
-        user = order.user
         total_price = 0
-        free_case_count = 0
 
         for item_data in items_data:
             product = item_data['product']
             quantity = item_data['quantity']
             price = product.price * quantity
 
-            if product.is_case:
-                if free_case_count < user.free_cases:
-                    is_free = True
-                    free_case_count += 1
-                else:
-                    is_free = False
-            else:
-                is_free = False
-
             OrderItem.objects.create(
                 order=order,
                 product=product,
                 quantity=quantity,
-                price=price if not is_free else 0,  # Бесплатный товар будет стоить 0
-                is_free=is_free
+                price=price
             )
-            total_price += price if not is_free else 0  # Не добавляем цену бесплатных товаров в общую стоимость
+            total_price += price
 
-        welcome_discount = user.welcome_discount or 0
-        welcome_discount_amount = round((total_price * welcome_discount) / 100)
-        total_price -= welcome_discount_amount
-
-        # Birthday скидка
-        birthday_discount = user.get_birthday_discount() or 0
-        birthday_discount_amount = round((total_price * birthday_discount) / 100)
-        total_price -= birthday_discount_amount
-
-        order.total_price = round(total_price)
-        order.discount = welcome_discount_amount + birthday_discount_amount
-        order.free_case_count = free_case_count
-        order.welcome_discount = welcome_discount
+        order.total_price = round(total_price, 2)
         order.save()
 
+        checkout_session = stripe.checkout.Session.create(
+            payment_method_types=['card'],
+            line_items=[
+                {
+                    'price_data': {
+                        'currency': 'usd',  # или 'rub' если нужна другая валюта
+                        'product_data': {
+                            'name': f'Order #{order.id}',
+                        },
+                        'unit_amount': int(order.total_price * 100),  # Цена в центах
+                    },
+                    'quantity': 1,
+                },
+            ],
+            mode='payment',
+            metadata={
+                "order_id": order.id
+            },
+            success_url=settings.PAYMENT_SUCCESS_URL,
+            cancel_url=settings.PAYMENT_CANCEL_URL,
+        )
+
+        self._context['checkout_url'] = checkout_session.url
+        order.checkout_url = checkout_session.url
         return order
 
-
-class OrderListSerializer(serializers.ModelSerializer):
-    order_items = OrderItemListSerializer(many=True, read_only=True)
-
-    class Meta:
-        model = Order
-        fields = ['id', 'total_price', 'discount', 'free_case_count', 'status', 'order_items', 'created_at', 'updated_at']
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data['checkout_url'] = getattr(instance, 'checkout_url', self._context.get('checkout_url', ''))
+        return data

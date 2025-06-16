@@ -10,10 +10,6 @@ class Product(models.Model):
         upload_to='products/banners/%Y/%m',
         blank=True, verbose_name=_("Баннер")
     )
-    color = models.ForeignKey(
-        'Color', on_delete=models.SET_NULL, null=True, blank=True,
-        related_name='products', verbose_name=_("Цвет")
-    )
     categories = models.ManyToManyField(
         'Category', blank=True, related_name='products', verbose_name=_("Категории")
     )
@@ -49,3 +45,19 @@ class ProductPhoto(models.Model):
 
     def __str__(self):
         return f"{self.product.name} — {self.alt or self.photo.name}"
+
+
+class ProductColorPhoto(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='color_photos')
+    color = models.ForeignKey('Color', on_delete=models.CASCADE)
+    photo = models.ImageField(upload_to='products/colors/%Y/%m', verbose_name=_("Фото"))
+    alt = models.CharField(max_length=255, blank=True, verbose_name=_("ALT-текст"))
+    order = models.PositiveIntegerField(default=0, verbose_name=_("Порядок"))
+
+    class Meta:
+        ordering = ['order', 'id']
+        verbose_name = _("Фото цветового варианта товара")
+        verbose_name_plural = _("Фотографии цветовых вариантов товаров")
+
+    def __str__(self):
+        return f"{self.product.name} - {self.color.name} — {self.alt or self.photo.name}"
