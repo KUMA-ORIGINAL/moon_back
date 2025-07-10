@@ -20,6 +20,8 @@ from django.contrib import admin
 from django.urls import path, include
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
+from . import views
+
 urlpatterns = [
     path('admin/', admin.site.urls),
 
@@ -29,6 +31,9 @@ urlpatterns = [
     path('api/', include('account.urls')),
     path('api/', include('products.urls')),
     path('api/', include('orders.urls')),
+
+    path('api/about/', views.AboutView.as_view()),
+    path('api/home/', views.HomeView.as_view()),
 ]
 
 if settings.DEBUG:
