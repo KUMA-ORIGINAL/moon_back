@@ -17,6 +17,7 @@ class Product(models.Model):
         'Tag', blank=True, related_name='products', verbose_name=_("Теги")
     )
     is_hidden = models.BooleanField(default=False, verbose_name=_("Скрыт"))
+    is_bestseller = models.BooleanField(default=False, verbose_name="Бестселлер")
 
     created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Дата создания"))
     updated_at = models.DateTimeField(auto_now=True, verbose_name=_("Дата обновления"))
