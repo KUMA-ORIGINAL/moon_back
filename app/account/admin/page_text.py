@@ -6,6 +6,6 @@ from ..models import PageText
 
 @admin.register(PageText)
 class PageTextAdmin(UnfoldModelAdmin):
-    list_display = ('key', 'text', 'text')
+    list_display = ('key', 'text',)
     search_fields = ('key', 'text')
     list_filter = ('key',)
