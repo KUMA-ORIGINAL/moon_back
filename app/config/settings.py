@@ -322,6 +322,11 @@ UNFOLD = {
                         "icon": "shopping_bag",
                         "link": reverse_lazy("admin:orders_order_changelist"),
                     },
+                    {
+                        "title": _("Тексты страниц"),
+                        "icon": "description",
+                        "link": reverse_lazy("admin:account_pagetext_changelist"),
+                    },
                 ],
             },
             {

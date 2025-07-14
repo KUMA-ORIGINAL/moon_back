@@ -4,9 +4,13 @@ from djoser.views import UserViewSet
 
 from .views import MeViewSet
 
+from . import views
+
 router = DefaultRouter()
+router.register(r'page-texts', views.PageTextViewSet, basename='page_text')
+
 urlpatterns = [
-    # path('', include(router.urls)),
+    path('', include(router.urls)),
     # path('users/me/', MeViewSet.as_view()),
     # path('auth/users/', UserViewSet.as_view({'post': 'create'})),
     # path('auth/users/activation/', UserViewSet.as_view({'post': 'activation'})),
